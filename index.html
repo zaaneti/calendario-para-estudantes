@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário para Estudantes</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="css/calendario.css">
+
+    <style>
+        .label-style {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .fw-extrabold {
+            font-weight: 800;
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <div class="container my-4">
+
+        <div id="widgetEventosDia" class="p-3 mb-4 d-none">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 me-3">
+                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 45px; height: 45px;">
+                        <i class="bi bi-megaphone-fill fs-5"></i>
+                    </div>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold mb-1">Acontecendo Hoje:</h6>
+                    <div id="listaAcontecendoHoje" class="d-flex flex-wrap gap-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4 align-items-center">
+            <div class="col-lg-4 col-md-12 mb-3 mb-lg-0">
+                <h2 id="mesAtual" class="fw-extrabold m-0 text-dark">Janeiro 2026</h2>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item small"><a href="#" class="text-decoration-none text-muted">Portal</a>
+                        </li>
+                        <li class="breadcrumb-item small active text-primary fw-bold">Calendário de Performance</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <div class="col-lg-4 col-md-6 text-center">
+                <div class="btn-group shadow-sm" role="group">
+                    <input type="checkbox" class="btn-check" id="f-vest" checked
+                        onclick="alternarFiltro('vestibulares')">
+                    <label class="btn btn-outline-secondary btn-sm" for="f-vest">🎓 Provas</label>
+
+                    <input type="checkbox" class="btn-check" id="f-est" checked onclick="alternarFiltro('estudos')">
+                    <label class="btn btn-outline-secondary btn-sm" for="f-est">📘 Estudos</label>
+
+                    <input type="checkbox" class="btn-check" id="f-laz" checked onclick="alternarFiltro('lazer')">
+                    <label class="btn btn-outline-secondary btn-sm" for="f-laz">🥗 Lazer</label>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 d-flex justify-content-md-end gap-2 mt-3 mt-md-0">
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary btn-sm" onclick="voltarMes()"><i
+                            class="bi bi-chevron-left"></i></button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="proximoMes()"><i
+                            class="bi bi-chevron-right"></i></button>
+                </div>
+                <button class="btn btn-outline-dark btn-sm" onclick="imprimirCalendario()">
+                    <i class="bi bi-printer"></i>
+                </button>
+                <button class="btn btn-dark fw-bold btn-sm px-3 shadow-sm" data-bs-toggle="modal"
+                    data-bs-target="#modalSelecaoVestibulares">
+                    <i class="bi bi-plus-circle me-1"></i> Meus Vestibulares
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow-lg border-0 overflow-hidden" style="border-radius: 20px;">
+            <div class="card-body p-0">
+                <div id="calendarioGrid"></div>
+            </div>
+        </div>
+
+        <div class="position-fixed bottom-0 end-0 m-4" style="z-index: 1050;">
+            <button class="btn btn-danger rounded-pill shadow-lg px-4 py-2 fw-bold" data-bs-toggle="modal"
+                data-bs-target="#modalAdm_NovoVestibular">
+                <i class="bi bi-shield-lock me-2"></i> Painel de Controle
+            </button>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalAcoesDia" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-body p-4 text-center">
+                    <h6 class="fw-bold mb-3 text-uppercase text-muted small" style="letter-spacing: 1px;">Ações do Dia
+                    </h6>
+                    <div class="modal-actions-container">
+                        <button class="btn btn-action-pill btn-action-add" onclick="navegarParaAdicionar()">
+                            <i class="bi bi-plus-lg me-1"></i> Criar
+                        </button>
+                        <button class="btn btn-action-pill btn-action-edit" onclick="navegarParaEditar()">
+                            <i class="bi bi-pencil me-1"></i> Editar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalSelecaoVestibulares" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">🎯 Configurar Meus Vestibulares</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-4">Marque os vestibulares que você irá prestar para atualizar seu
+                        calendário automaticamente.</p>
+                    <div class="table-responsive">
+                        <table class="table align-middle table-hover">
+                            <thead class="table-light">
+                                <tr class="small text-uppercase">
+                                    <th class="text-center" width="80">Ver</th>
+                                    <th>Instituição</th>
+                                    <th class="text-center" width="100">Isenção</th>
+                                    <th class="text-center" width="100">Pago</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaSelecaoVestibulares">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-primary w-100 fw-bold py-2 shadow-sm"
+                        onclick="salvarEscolhas()">Atualizar meu Cronograma</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEvento" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold text-uppercase text-muted small">Novo Lembrete</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="label-style">O que você fará?</label>
+                        <input type="text" id="tituloEvento" class="form-control" placeholder="Ex: Simulado VUNESP">
+                    </div>
+                    <div class="mb-2">
+                        <label class="label-style">Prioridade/Cor</label>
+                        <select id="corEvento" class="form-select">
+                            <option value="bg-primary text-white">📘 Estudos</option>
+                            <option value="bg-success text-white">🥗 Lazer/Descanso</option>
+                            <option value="bg-warning text-dark">✍️ Revisão Urgente</option>
+                            <option value="bg-dark text-white">🎯 Foco Total</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button class="btn btn-primary w-100 fw-bold" onclick="salvarEvento()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEdicaoEvento" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title fw-bold text-uppercase text-muted small">Gerenciar Eventos do Dia</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="listaEventosEdicao" class="d-grid gap-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalAdm_NovoVestibular" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white border-0 py-3">
+                    <h6 class="modal-title fw-bold text-uppercase mb-0">
+                        <i class="bi bi-shield-lock me-2"></i>Gestão Estratégica
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <ul class="nav nav-tabs nav-fill bg-light" id="mentorTab" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active small fw-bold" id="vest-tab" data-bs-toggle="tab"
+                                data-bs-target="#tab-vestibulares" type="button">🎓 VESTIBULARES</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link small fw-bold" id="event-tab" data-bs-toggle="tab"
+                                data-bs-target="#tab-eventos" type="button">📅 AVISOS/SIMULADOS</button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content p-4" id="mentorTabContent">
+                        <div class="tab-pane fade show active" id="tab-vestibulares" role="tabpanel">
+                            <div id="formVestibularAdm" class="mb-4 p-3 bg-light rounded border">
+                                <input type="hidden" id="admIdVestibular">
+                                <h6 class="fw-bold mb-3 border-bottom pb-2 small" id="tituloFormAdm">Cadastrar Nova Prova</h6>
+                                <div class="mb-3">
+                                    <label class="label-style">Nome da Instituição</label>
+                                    <input type="text" id="admNomeVestibular" class="form-control form-control-sm"
+                                        placeholder="Ex: FUVEST 2027">
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6"><label class="label-style">Início Inscrição</label><input
+                                            type="date" id="admDataInicioInsc" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="col-6"><label class="label-style">Fim Inscrição</label><input
+                                            type="date" id="admDataFimInsc" class="form-control form-control-sm"></div>
+                                    <div class="col-6"><label class="label-style">1ª Fase</label><input type="date"
+                                            id="admDataFase1" class="form-control form-control-sm"></div>
+                                    <div class="col-6"><label class="label-style">2ª Fase</label><input type="date"
+                                            id="admDataFase2" class="form-control form-control-sm"></div>
+                                    <div class="col-12"><label class="label-style text-success">Data do Resultado</label><input type="date" id="admDataResultado"
+                                            class="form-control form-control-sm"></div>
+                                </div>
+                                <div class="d-flex gap-2 mt-3">
+                                    <button class="btn btn-danger flex-grow-1 fw-bold btn-sm"
+                                        onclick="salvarNovoVestibular()">Salvar Alterações</button>
+                                    <button id="btnCancelVest" class="btn btn-secondary btn-sm d-none"
+                                        onclick="limparFormAdm()">Cancelar</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive" style="max-height: 200px;">
+                                <table class="table table-sm table-hover border small">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Instituição</th>
+                                            <th class="text-end">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="listaVestibularesAdm"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="tab-eventos" role="tabpanel">
+                            <div id="formEventoMentor" class="mb-4 p-3 bg-light rounded border border-primary">
+                                <input type="hidden" id="mentorIdEvento">
+                                <h6 class="fw-bold mb-3 border-bottom pb-2 small text-primary">Postar Evento
+                                </h6>
+                                <div class="mb-3">
+                                    <label class="label-style">Título do Comunicado</label>
+                                    <input type="text" id="mentorTituloEvento" class="form-control form-control-sm"
+                                        placeholder="Ex: Aula Magna de Redação">
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <label class="label-style">Data do Evento</label>
+                                        <input type="date" id="mentorDataEvento" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="label-style">Tipo de Tag</label>
+                                        <select id="mentorCorEvento" class="form-select form-select-sm">
+                                            <option value="bg-primary text-white">Simulado</option>
+                                            <option value="bg-info text-dark">Aula Especial</option>
+                                            <option value="bg-warning text-dark">Urgente / Aviso</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2 mt-3">
+                                    <button class="btn btn-primary flex-grow-1 fw-bold btn-sm"
+                                        onclick="salvarEventoMentor()">Agendar na Timeline</button>
+                                    <button id="btnCancelEvMentor" class="btn btn-secondary btn-sm d-none"
+                                        onclick="limparFormEventoMentor()">Cancelar</button>
+                                </div>
+                            </div>
+                            <div class="table-responsive" style="max-height: 200px;">
+                                <table class="table table-sm table-hover border small">
+                                    <thead class="table-primary text-primary">
+                                        <tr>
+                                            <th>Evento</th>
+                                            <th>Data</th>
+                                            <th class="text-end">Ação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="listaEventosMentor"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalConfirmacao" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg"
+                style="border-radius: 20px; background: #2d3436; color: white;">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Tem certeza?</h5>
+                    <p id="textoConfirmacao" class="text-light small mb-4">Esta ação não poderá ser desfeita.</p>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-light w-100 fw-bold btn-sm" data-bs-dismiss="modal"
+                            style="border-radius: 10px;">Cancelar</button>
+                        <button type="button" id="btnConfirmarAcao" class="btn btn-danger w-100 fw-bold btn-sm"
+                            style="border-radius: 10px; background: #ff4d4d;">Excluir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/calendario.js"></script>
+</body>
+
+</html>
