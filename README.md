@@ -5,7 +5,7 @@ A simple and intuitive web-based calendar designed to help students organize the
 ## 🚀 Live Demo
 
 Access the project here:
-https://zaaneti.github.io/calendario-para-estudantes/
+[https://zaaneti.github.io/calendario-para-estudantes/](https://zaaneti.github.io/calendar-for-students/)
 
 ---
 
